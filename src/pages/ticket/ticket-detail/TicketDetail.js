@@ -6,6 +6,8 @@ import {statusCode} from '../../../constants/status-code';
 import {getAllComments, getTicketDetail, updateStatus, postComment} from '../../../service/import.service';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
+import {useDispatch} from 'react-redux';
+import {editStatus} from '../../../redux/actions/ticketAction';
 
 function TicketDetail({route}) {
   const {id} = route.params;
@@ -23,6 +25,8 @@ function TicketDetail({route}) {
     fileName: null,
     fileExtension: null,
   });
+
+  const dispatch = useDispatch();
 
   useFocusEffect(
     useCallback(() => {
@@ -56,7 +60,14 @@ function TicketDetail({route}) {
 
   const changeStatus = () => {
     updateStatus({id: id, updatedBy: ''})
-      .then(() => setToggleEdit(!toggleEdit))
+      .then(() => {
+        setToggleEdit(!toggleEdit);
+        if (detail.statusName == statusCode.CLS) {
+          dispatch(editStatus(id, statusCode.ROPN));
+        } else {
+          dispatch(editStatus(id, statusCode.CLS));
+        }
+      })
       .catch(e => console.log(e));
   };
 
@@ -114,7 +125,7 @@ function TicketDetail({route}) {
     }
   };
 
-  const color = "#49983b";
+  const color = '#49983b';
 
   return (
     <View>
@@ -130,11 +141,20 @@ function TicketDetail({route}) {
           </Paragraph>
         </Card.Content>
         <Card.Actions>
-          <Button onPress={downloadFile} textColor={color}>Download File</Button>
-          <Button onPress={changeStatus} buttonColor={color}>Ubah status</Button>
+          <Button onPress={downloadFile} textColor={color}>
+            Download File
+          </Button>
+          <Button onPress={changeStatus} buttonColor={color}>
+            Ubah status
+          </Button>
         </Card.Actions>
       </Card>
-      <ScrollView style={detail.statusName != statusCode.CLS ? {height: '50%'} : {height: '70%'}}>
+      <ScrollView
+        style={
+          detail.statusName != statusCode.CLS
+            ? {height: '50%'}
+            : {height: '70%'}
+        }>
         {comments.map(d => (
           <Card key={d.id} style={[styles.margin_t_20]}>
             <Card.Title
@@ -149,7 +169,8 @@ function TicketDetail({route}) {
                     Linking.openURL(
                       `http://192.168.10.105:3333/files/${d.fileId}`,
                     );
-                  }} textColor={color}>
+                  }}
+                  textColor={color}>
                   Download File
                 </Button>
               </Card.Actions>
@@ -170,8 +191,12 @@ function TicketDetail({route}) {
             />
           </Card.Content>
           <Card.Actions>
-            <Button onPress={fileHandler} textColor={color}>Upload</Button>
-            <Button onPress={commentHandler} buttonColor={color}>Kirim</Button>
+            <Button onPress={fileHandler} textColor={color}>
+              Upload
+            </Button>
+            <Button onPress={commentHandler} buttonColor={color}>
+              Kirim
+            </Button>
           </Card.Actions>
         </Card>
       )}
@@ -180,26 +205,26 @@ function TicketDetail({route}) {
 }
 
 const styles = StyleSheet.create({
-  margin_y_20 : {
-    marginVertical: 20
+  margin_y_20: {
+    marginVertical: 20,
   },
   pad_t_20: {
-    paddingTop: 20
+    paddingTop: 20,
   },
   title: {
-    fontSize: 25
+    fontSize: 25,
   },
   desc: {
-    fontSize: 18
+    fontSize: 18,
   },
-  margin_t_20 : {
-    marginTop: 20
+  margin_t_20: {
+    marginTop: 20,
   },
   form: {
     borderWidth: 1,
     borderColor: 'black',
-    marginTop: 10
+    marginTop: 10,
   },
-})
+});
 
 export default TicketDetail;

@@ -2,15 +2,12 @@ import React, {useState} from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Avatar, Button, Card} from 'react-native-paper';
 import {roleCode} from '../../../constants/role-code';
-import {
-  getAllTicketByCustomer,
-  getAllTicketByPic,
-  getTickets,
-} from '../../../service/import.service';
+import {getAllTicketByCustomer, getAllTicketByPic, getTickets} from '../../../service/import.service';
 import {getRole} from '../../login/Login';
 import {useSelector, useDispatch, shallowEqual} from 'react-redux';
 import {useEffect} from 'react';
 import {load} from '../../../redux/actions/ticketAction';
+import {statusCode} from '../../../constants/status-code';
 
 function TicketList({navigation}) {
   const tickets = useSelector(store => store.tickets, shallowEqual);
@@ -60,8 +57,18 @@ function TicketList({navigation}) {
   const DataTicket = props => {
     return (
       <View style={styles.flex_row}>
-        <Text style={styles.margin_10}>{props.code}</Text>
-        <Text>{props.priorityName}</Text>
+        <Text
+          style={
+            props.statusName == statusCode.CLS
+              ? [styles.margin_10, styles.red_color]
+              : styles.margin_10
+          }>
+          {props.code}
+        </Text>
+        <Text
+          style={props.statusName == statusCode.CLS ? styles.red_color : ''}>
+          {props.priorityName}
+        </Text>
       </View>
     );
   };
@@ -69,7 +76,12 @@ function TicketList({navigation}) {
   const CardComponent = props => {
     return (
       <Card.Title
-        title={props.title}
+        titleStyle={props.statusName == statusCode.CLS ? styles.red_color : ''}
+        title={
+          props.statusName == statusCode.CLS
+            ? `${props.title} (CLOSED)`
+            : props.title
+        }
         subtitle={<DataTicket {...props} />}
         left={() => <Avatar.Icon icon="ticket" size={50} style={styles.icon} />}
       />
@@ -111,7 +123,7 @@ function TicketList({navigation}) {
 
 const styles = StyleSheet.create({
   page: {
-    height: '90%'
+    height: '90%',
   },
   btn_add: {
     borderRadius: 0,
