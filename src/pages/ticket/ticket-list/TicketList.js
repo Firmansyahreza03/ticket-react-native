@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View, ActivityIndicator} from 'react-native';
 import {Avatar, Button, Card} from 'react-native-paper';
 import {roleCode} from '../../../constants/role-code';
 import {getAllTicketByCustomer, getAllTicketByPic, getTickets} from '../../../service/import.service';
@@ -8,10 +8,12 @@ import {useSelector, useDispatch, shallowEqual} from 'react-redux';
 import {useEffect} from 'react';
 import {load} from '../../../redux/actions/ticketAction';
 import {statusCode} from '../../../constants/status-code';
+import Header from '../../header/Header';
 
 function TicketList({navigation}) {
   const tickets = useSelector(store => store.tickets, shallowEqual);
   const [role, setRole] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -24,34 +26,37 @@ function TicketList({navigation}) {
   useEffect(() => {
     if (role == roleCode.ADMIN) {
       getTicketSuperAdmin();
-      console.log(roleCode.ADMIN);
     } else if (role == roleCode.PIC) {
       getTicketPic();
-      console.log(roleCode.PIC);
     } else if (role == roleCode.CUST) {
       getTicketCust();
-      console.log(roleCode.CUST);
     }
   }, [role]);
 
-  const getTicketSuperAdmin = () => {
-    getTickets()
+  const getTicketSuperAdmin = async () => {
+    setLoading(true);
+    await getTickets()
       .then(res => dispatch(load(res.datas)))
       .catch(e => console.log(e));
+    setLoading(false);
   };
 
-  const getTicketPic = () => {
-    getAllTicketByPic()
+  const getTicketPic = async () => {
+    setLoading(true);
+    await getAllTicketByPic()
       .then(res => dispatch(load(res.datas)))
       .catch(e => console.log(e));
+    setLoading(false);
   };
 
-  const getTicketCust = () => {
-    getAllTicketByCustomer()
+  const getTicketCust = async () => {
+    setLoading(true);
+    await getAllTicketByCustomer()
       .then(res => {
         dispatch(load(res.datas));
       })
       .catch(e => console.log(e));
+    setLoading(false);
   };
 
   const DataTicket = props => {
@@ -60,18 +65,28 @@ function TicketList({navigation}) {
         <Text
           style={
             props.statusName == statusCode.CLS
-              ? [styles.margin_10, styles.red_color]
-              : styles.margin_10
+              ? [styles.margin_5, styles.red_color]
+              : styles.margin_5
           }>
           {props.code}
         </Text>
         <Text
-          style={props.statusName == statusCode.CLS ? styles.red_color : ''}>
-          {props.priorityName}
+          style={props.statusName == statusCode.CLS ? [styles.red_color, styles.margin_5] : [styles.margin_5]}>
+          {(props.priorityName).substring(0,1)}
         </Text>
+        <Text style={props.statusName == statusCode.CLS ? styles.red_color : ''}>{props.productName}</Text>
       </View>
     );
   };
+
+  const RightContentCard = props => {
+    return (
+      <View style={styles.rightContent}>
+        <Text style={props.statusName == statusCode.CLS ? styles.red_color : ''}>{Date(props.createdAt).substring(0,15)}</Text>
+        <Text style={props.statusName == statusCode.CLS ? [styles.red_color, styles.margin_t_5] : styles.margin_t_5}>{props.picName}</Text>
+      </View>
+    )
+  }
 
   const CardComponent = props => {
     return (
@@ -84,6 +99,7 @@ function TicketList({navigation}) {
         }
         subtitle={<DataTicket {...props} />}
         left={() => <Avatar.Icon icon="ticket" size={50} style={styles.icon} />}
+        right={() => <RightContentCard {...props} />}
       />
     );
   };
@@ -100,16 +116,18 @@ function TicketList({navigation}) {
 
   return (
     <View>
-      <Button
+      <Header icon="ticket" title="Daftar Ticket" />
+      {role == roleCode.CUST && <Button
         onPress={goToAddForm}
         mode="contained"
         icon="plus"
         buttonColor="#49983b"
         style={styles.btn_add}>
         TAMBAH TIKET
-      </Button>
-      <ScrollView style={styles.page}>
-        {tickets.map(d => {
+      </Button>}
+      <ScrollView style={role == roleCode.CUST ? styles.page_cust : styles.page_pic}>
+        {loading && <ActivityIndicator animating={loading} color="#49983b" size="large" style={styles.loading} />}
+        {!loading && tickets.map(d => {
           return (
             <View key={d.id} onTouchEnd={() => goToDetail({...d})}>
               <CardComponent {...d} />
@@ -122,8 +140,14 @@ function TicketList({navigation}) {
 }
 
 const styles = StyleSheet.create({
-  page: {
-    height: '90%',
+  loading: {
+    marginTop: '70%'
+  },
+  page_cust: {
+    height: '85%',
+  },
+  page_pic: {
+    height: '92%',
   },
   btn_add: {
     borderRadius: 0,
@@ -133,8 +157,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
-  margin_10: {
-    marginEnd: 10,
+  margin_5: {
+    marginEnd: 5,
   },
   red_color: {
     color: 'red',
@@ -142,6 +166,16 @@ const styles = StyleSheet.create({
   icon: {
     backgroundColor: '#49983b',
   },
+  rightContent: {
+    flex:1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    marginEnd: 5
+  },
+  margin_t_5:{
+    marginTop: '5%'
+  }
 });
 
 export default TicketList;

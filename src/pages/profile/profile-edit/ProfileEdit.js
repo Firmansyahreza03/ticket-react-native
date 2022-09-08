@@ -1,12 +1,13 @@
 import {useFocusEffect} from '@react-navigation/native';
 import React, {useCallback, useState} from 'react';
 import {ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
-import {Avatar,Button,Card,Modal,Portal,Provider,RadioButton} from 'react-native-paper';
+import {ActivityIndicator, Avatar, Button, Card, Modal, Portal, Provider, RadioButton} from 'react-native-paper';
 import {roleCode} from '../../../constants/role-code';
-import {getProfileCustById,getProfileEmpById,getCompanies,updateProfileCust} from '../../../service/import.service';
+import {getProfileCustById, getProfileEmpById, getCompanies, updateProfileCust} from '../../../service/import.service';
 import {getRole} from '../../login/Login';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
+import Header from '../../header/Header';
 
 function ProfileEdit({route, navigation}) {
   const [visible, setVisible] = React.useState(false);
@@ -14,6 +15,7 @@ function ProfileEdit({route, navigation}) {
   const [profile, setProfile] = useState({});
   const [role, setRole] = useState('');
   const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(false);
   const {id} = route.params;
   useFocusEffect(
     useCallback(() => {
@@ -31,29 +33,31 @@ function ProfileEdit({route, navigation}) {
     useCallback(() => {
       if (role == roleCode.PIC) {
         getProfileEmp();
-        console.log(roleCode.PIC);
       } else if (role == roleCode.CUST) {
         getProfileCust();
-        console.log(roleCode.CUST);
       }
     }, [role]),
   );
 
   const getProfileCust = async () => {
+    setLoading(true);
     await getProfileCustById(id)
       .then(res => {
         setProfile(res.data);
         console.log(res.data.fileId);
       })
       .catch(e => console.log(e));
+    setLoading(false);
   };
 
   const getProfileEmp = async () => {
+    setLoading(true);
     await getProfileEmpById(id)
       .then(res => {
         setProfile(res.data);
       })
       .catch(e => console.log(e));
+    setLoading(false);
   };
 
   const color = '#49983b';
@@ -126,7 +130,9 @@ function ProfileEdit({route, navigation}) {
 
   return (
     <View>
-      <ScrollView>
+      <Header title="Ubah Profil" icon="account" />
+      {loading && <ActivityIndicator animating={loading} color="#49983b" size="large" style={styles.loading} />}
+      {!loading && <ScrollView style={styles.page}>
         <View style={styles.image}>
           <Avatar.Image
             size={250}
@@ -201,15 +207,21 @@ function ProfileEdit({route, navigation}) {
             SIMPAN
           </Button>
         </Card.Actions>
-      </ScrollView>
+      </ScrollView>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  loading: {
+    marginTop: '70%'
+  },
+  page: {
+    height: '92%',
+  },
   form: {
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: '#49983b',
     marginVertical: '2%',
     backgroundColor: 'white',
     height: 50,
@@ -218,6 +230,7 @@ const styles = StyleSheet.create({
     paddingStart: 10,
     width: '95%',
     marginStart: '2.5%',
+    borderRadius: 15
   },
   flex: {
     flex: 1,

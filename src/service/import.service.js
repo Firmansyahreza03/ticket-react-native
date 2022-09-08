@@ -21,8 +21,10 @@ import {
 import {getCompanies} from './company.service';
 import {getProductByCust} from './product.service';
 import {getPriorities} from './priority.service';
+import {changePass} from './user.service'
 
 export {
+  changePass,
   findByIdTicket,
   postComment,
   postTicket,

@@ -4,10 +4,14 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ticket from './ticket/Ticket';
 import Profile from './profile/Profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+import { load } from '../redux/actions/ticketAction';
 
 const Logout = ({navigation}) => {
+  const dispatch = useDispatch();
   useEffect(() => {
     AsyncStorage.clear().then(() => {
+      dispatch(load([]));
       navigation.navigate('Login');
     });
   }, []);
@@ -26,7 +30,7 @@ function Menu() {
         name="Ticket"
         component={Ticket}
         options={{
-          tabBarLabel: 'Ticket',
+          tabBarLabel: 'Tiket',
           tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons name="ticket" color={color} size={size} />
           ),
@@ -36,7 +40,7 @@ function Menu() {
         name="Profile"
         component={Profile}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: 'Profil',
           tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons name="account" color={color} size={size} />
           ),
@@ -46,7 +50,7 @@ function Menu() {
         name="Logout"
         component={Logout}
         options={{
-          tabBarLabel: 'Log-out',
+          tabBarLabel: 'Log Out',
           tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons
               name="logout-variant"

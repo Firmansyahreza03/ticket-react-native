@@ -7,6 +7,7 @@ import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import {useDispatch} from 'react-redux';
 import {add} from '../../../redux/actions/ticketAction';
+import Header from '../../header/Header';
 
 function TicketForm({navigation}) {
   const [upload, setUpload] = useState({
@@ -103,7 +104,8 @@ function TicketForm({navigation}) {
 
   return (
     <View>
-      <ScrollView>
+      <Header icon="ticket" title="Ticket Baru" />
+      <ScrollView style={styles.page}>
         <View style={[styles.image_position, styles.vertical_margin]}>
           <Image
             source={require('../../../assets/Tickets-icon.png')}
@@ -113,7 +115,7 @@ function TicketForm({navigation}) {
         <Text style={[styles.label, styles.vertical_margin]}>JUDUL : </Text>
         <TextInput style={styles.form} onChangeText={titleHandler} />
         <Text style={[styles.label, styles.vertical_margin]}>
-          PERMASALAHAN :{' '}
+          PERMASALAHAN :
         </Text>
         <TextInput style={styles.form} onChangeText={descriptionHandler} />
         <View style={[styles.label, styles.flex, styles.vertical_margin]}>
@@ -134,9 +136,9 @@ function TicketForm({navigation}) {
         </View>
         <Text style={[styles.vertical_margin, styles.label]}>LAMPIRAN</Text>
         {upload.fileName && (
-          <View>
+          <View style={styles.file_bg}>
             <Text style={styles.file_desc}>Nama File : {upload.fileName}</Text>
-            <Text style={styles.file_desc}>
+            <Text style={[styles.file_desc, styles.file_type]}>
               Bentuk File : {upload.fileType}
             </Text>
           </View>
@@ -159,6 +161,7 @@ function TicketForm({navigation}) {
                 value={form.priorityId}>
                 {priority.map(d => (
                   <RadioButton.Item
+                    color='#49983b'
                     key={d.id}
                     label={d.priorityName}
                     value={d.id}
@@ -180,6 +183,7 @@ function TicketForm({navigation}) {
                 value={form.productId}>
                 {product.map(d => (
                   <RadioButton.Item
+                    color='#49983b'
                     key={d.id}
                     label={d.productName}
                     value={d.id}
@@ -200,14 +204,28 @@ function TicketForm({navigation}) {
 }
 
 const styles = StyleSheet.create({
+  file_bg: {
+    backgroundColor: 'white',
+    marginVertical: 10,
+    marginHorizontal: 10,
+    borderWidth: 1,
+    padding: 10,
+    justifyContent: 'center',
+  },
+  page:{
+    height: '92%'
+  },
   file_desc: {
     marginStart: '2.5%',
     color: 'black',
-    marginTop: '2.5%',
+  },
+  file_type: {
+    marginTop: '2.5%'
   },
   form: {
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: '#49983b',
     marginVertical: '2%',
     backgroundColor: 'white',
     height: 50,

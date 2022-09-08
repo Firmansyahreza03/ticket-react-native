@@ -1,16 +1,18 @@
 import {useFocusEffect} from '@react-navigation/native';
 import React, {useCallback, useState} from 'react';
 import {Linking, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
-import {Avatar, Button, Card, Paragraph, Title} from 'react-native-paper';
+import {ActivityIndicator, Avatar, Button, Card, Paragraph, Title} from 'react-native-paper';
 import {statusCode} from '../../../constants/status-code';
 import {getAllComments, getTicketDetail, updateStatus, postComment} from '../../../service/import.service';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import {useDispatch} from 'react-redux';
 import {editStatus} from '../../../redux/actions/ticketAction';
+import Header from '../../header/Header';
 
 function TicketDetail({route}) {
   const {id} = route.params;
+  const [loading, setLoading] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [detail, setDetail] = useState({});
   const [comments, setComments] = useState([]);
@@ -42,24 +44,27 @@ function TicketDetail({route}) {
     }, [toggleEdit]),
   );
 
-  const getDetail = () => {
-    getTicketDetail(id)
+  const getDetail = async () => {
+    setLoading(true);
+    await getTicketDetail(id)
       .then(res => setDetail(res.data))
       .catch(e => console.log(e));
   };
 
-  const getComments = () => {
-    getAllComments(id)
+  const getComments = async () => {
+    await getAllComments(id)
       .then(res => setComments(res.datas))
       .catch(e => console.log(e));
+    setLoading(false);
   };
 
   const downloadFile = () => {
     Linking.openURL(`http://192.168.10.105:3333/files/${detail.fileId}`);
   };
 
-  const changeStatus = () => {
-    updateStatus({id: id, updatedBy: ''})
+  const changeStatus = async () => {
+    setLoading(true);
+    await updateStatus({id: id, updatedBy: ''})
       .then(() => {
         setToggleEdit(!toggleEdit);
         if (detail.statusName == statusCode.CLS) {
@@ -69,6 +74,7 @@ function TicketDetail({route}) {
         }
       })
       .catch(e => console.log(e));
+    setLoading(false);
   };
 
   const LeftContent = props => (
@@ -129,7 +135,9 @@ function TicketDetail({route}) {
 
   return (
     <View>
-      <Card mode="outlined">
+      <Header title={`Tiket : ${detail.code}`} icon="ticket" />
+      {loading && <ActivityIndicator animating={loading} color="#49983b" size="large" style={styles.loading} />}
+      {!loading && <Card>
         <Card.Content style={[styles.margin_y_20, styles.pad_t_20]}>
           <Title style={[styles.title]}>
             {detail.statusName == statusCode.CLS
@@ -142,18 +150,18 @@ function TicketDetail({route}) {
         </Card.Content>
         <Card.Actions>
           <Button onPress={downloadFile} textColor={color}>
-            Download File
+            Unduh lampiran
           </Button>
           <Button onPress={changeStatus} buttonColor={color}>
             Ubah status
           </Button>
         </Card.Actions>
-      </Card>
-      <ScrollView
+      </Card>}
+      {!loading && <ScrollView
         style={
           detail.statusName != statusCode.CLS
-            ? {height: '50%'}
-            : {height: '70%'}
+            ? {height: '45%'}
+            : {height: '65%'}
         }>
         {comments.map(d => (
           <Card key={d.id} style={[styles.margin_t_20]}>
@@ -177,10 +185,10 @@ function TicketDetail({route}) {
             )}
           </Card>
         ))}
-      </ScrollView>
+      </ScrollView>}
 
-      {detail.statusName != statusCode.CLS && (
-        <Card style={[styles.margin_t_20]}>
+      {!loading && detail.statusName != statusCode.CLS && (
+        <Card mode='outlined'>
           <Card.Content>
             <Text>Komentar</Text>
             <TextInput
@@ -205,6 +213,9 @@ function TicketDetail({route}) {
 }
 
 const styles = StyleSheet.create({
+  loading: {
+    marginTop: '70%'
+  },
   margin_y_20: {
     marginVertical: 20,
   },
