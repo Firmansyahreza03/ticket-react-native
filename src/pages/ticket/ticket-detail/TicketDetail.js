@@ -1,7 +1,7 @@
 import {useFocusEffect} from '@react-navigation/native';
 import React, {useCallback, useState} from 'react';
 import {Linking, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
-import {ActivityIndicator, Avatar, Button, Card, Paragraph, Title} from 'react-native-paper';
+import {ActivityIndicator, Avatar, Button, Card, Chip, Paragraph, Title} from 'react-native-paper';
 import {statusCode} from '../../../constants/status-code';
 import {getAllComments, getTicketDetail, updateStatus, postComment} from '../../../service/import.service';
 import RNFS from 'react-native-fs';
@@ -9,6 +9,7 @@ import DocumentPicker from 'react-native-document-picker';
 import {useDispatch} from 'react-redux';
 import {editStatus} from '../../../redux/actions/ticketAction';
 import Header from '../../header/Header';
+import { Icon } from 'react-native-vector-icons/MaterialCommunityIcons';
 
 function TicketDetail({route}) {
   const {id} = route.params;
@@ -139,14 +140,23 @@ function TicketDetail({route}) {
       {loading && <ActivityIndicator animating={loading} color="#49983b" size="large" style={styles.loading} />}
       {!loading && <Card>
         <Card.Content style={[styles.margin_y_20, styles.pad_t_20]}>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={[styles.label, styles.purple]}><Icon name="folder" />{detail.productName}</Text>
+            <Text style={[styles.label, styles.margin_s_10, detail.priorityName=="High" ? styles.red_label : detail.priorityName=="Medium" ? styles.blue_label : styles.green_label]}>{detail.priorityName}</Text>
+            <Text style={[styles.label, styles.margin_s_10, detail.statusName==statusCode.CLS ? styles.grey_label : styles.red_label]}>{detail.statusName}</Text>
+          </View>
           <Title style={[styles.title]}>
-            {detail.statusName == statusCode.CLS
-              ? `${detail.title} (CLOSED)`
-              : detail.title}
+            {detail.title}
           </Title>
-          <Paragraph style={[styles.margin_y_20, styles.desc]}>
-            {detail.description}
-          </Paragraph>
+          <View>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={{color: 'black'}}>{Date(detail.createdAt).substring(0,21)} | </Text>
+              <Text style={{fontWeight:'bold', color: 'black'}}>Nama PIC : {detail.picName}</Text>
+            </View>
+            <Paragraph style={[styles.margin_y_20, styles.desc]}>
+              {detail.description}
+            </Paragraph>
+          </View>
         </Card.Content>
         <Card.Actions>
           <Button onPress={downloadFile} textColor={color}>
@@ -213,6 +223,32 @@ function TicketDetail({route}) {
 }
 
 const styles = StyleSheet.create({
+  label: {
+    color: 'white',
+    padding: 7,
+    textAlign: 'center',
+    marginBottom: 5,
+    borderRadius: 10,
+    fontWeight: 'bold'
+  },
+  margin_s_10:{
+    marginStart: 10,
+  },
+  purple:{
+    backgroundColor: 'purple'
+  },
+  red_label: {
+    backgroundColor: 'red'
+  },
+  green_label: {
+    backgroundColor: 'green'
+  },
+  grey_label: {
+    backgroundColor: 'grey'
+  },
+  blue_label: {
+    backgroundColor: 'blue'
+  },
   loading: {
     marginTop: '70%'
   },
@@ -223,6 +259,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   title: {
+    marginTop: 10,
     fontSize: 25,
   },
   desc: {

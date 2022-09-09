@@ -202,7 +202,7 @@ function ProfileEdit({route, navigation}) {
             </Modal>
           </Portal>
         </Provider>
-        <Card.Actions>
+        <Card.Actions style={styles.margin_t_10}>
           <Button buttonColor={color} textColor="white" onPress={editHandler}>
             SIMPAN
           </Button>
@@ -213,6 +213,9 @@ function ProfileEdit({route, navigation}) {
 }
 
 const styles = StyleSheet.create({
+  margin_t_10: {
+    marginTop: 10
+  },
   loading: {
     marginTop: '70%'
   },
